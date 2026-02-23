@@ -290,9 +290,20 @@ VerificationTest[
 
 (* ==========================================================================
    Expression — vs MultiwayOperatorSystem RF
-   Note: RF wraps expression states as strings; we return native expressions.
-   Only StatesCountsList is directly comparable.
+   RF wraps expression states as strings; we use Map[ToString] to compare.
    ========================================================================== *)
+
+VerificationTest[
+    Map[ToString, MultiwaySystem[f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 2], {2}],
+    ResourceFunction["MultiwayOperatorSystem"][f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 2],
+    TestID -> "Compare-Expression-commutative-2"
+]
+
+VerificationTest[
+    Map[ToString, MultiwaySystem[f[x_, y_] :> f[y, x], f[a, b], 1], {2}],
+    ResourceFunction["MultiwayOperatorSystem"][f[x_, y_] :> f[y, x], f[a, b], 1],
+    TestID -> "Compare-Expression-simple-swap"
+]
 
 VerificationTest[
     MultiwaySystem[f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 2, "StatesCountsList"],
@@ -303,9 +314,20 @@ VerificationTest[
 
 (* ==========================================================================
    ConstructExpression — vs MultiwayCombinator RF
-   Note: RF wraps combinator states as strings; we return native expressions.
-   Only StatesCountsList is directly comparable.
+   RF wraps combinator states as strings; we use Map[ToString] to compare.
    ========================================================================== *)
+
+VerificationTest[
+    Map[ToString, MultiwaySystem[k[x_][y_] :> x, k[a][b], 1], {2}],
+    ResourceFunction["MultiwayCombinator"][k[x_][y_] :> x, k[a][b], 1],
+    TestID -> "Compare-Combinator-K"
+]
+
+VerificationTest[
+    Map[ToString, MultiwaySystem[{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 2], {2}],
+    ResourceFunction["MultiwayCombinator"][{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 2],
+    TestID -> "Compare-Combinator-SK-2"
+]
 
 VerificationTest[
     MultiwaySystem[{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 2, "StatesCountsList"],
