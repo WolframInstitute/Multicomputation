@@ -262,3 +262,13 @@ MultiwaySystem[rules_, init_, n_Integer] /;
         ]
     ]
 
+(* 3-arg property: MultiwaySystem[rules, init, "Property", opts...] — no step count *)
+MultiwaySystem[rules_, init_, prop_String, opts : OptionsPattern[]] /;
+    !MultiwaySystemQ[Unevaluated[MultiwaySystem[rules, init, prop, opts]]] :=
+    Module[{ms = MultiwaySystem[rules, init, "DeduplicateSlices" -> True]},
+        If[MultiwaySystemQ[ms],
+            MultiwaySystemProp[ms, prop, opts],
+            $Failed
+        ]
+    ]
+

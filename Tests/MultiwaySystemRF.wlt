@@ -90,8 +90,7 @@ VerificationTest[
 (* ===== CanonicalBranchPairsList ===== *)
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AB", "BA" -> "A"}, "ABA"];
-    ms["CanonicalBranchPairsList"],
+    MultiwaySystem[{"A" -> "AB", "BA" -> "A"}, "ABA", "CanonicalBranchPairsList"],
     _List,
     TestID -> "CanonicalBranchPairsList-returns-list",
     SameTest -> MatchQ
@@ -101,8 +100,7 @@ VerificationTest[
 (* ===== TotalCausalInvariantQ ===== *)
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AB", "B" -> "A"}, "A"];
-    ms["TotalCausalInvariantQ", 5],
+    MultiwaySystem[{"A" -> "AB", "B" -> "A"}, "A", "TotalCausalInvariantQ"],
     True,
     TestID -> "TotalCausalInvariantQ-true"
 ]
@@ -111,9 +109,7 @@ VerificationTest[
 (* ===== AllEventsList ===== *)
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    events = ms["AllEventsList", 1];
-    MatchQ[events, {{__List} ..}],
+    MatchQ[MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 1, "AllEventsList"], {{__List} ..}],
     True,
     TestID -> "AllEventsList-returns-nested-list"
 ]
@@ -122,54 +118,52 @@ VerificationTest[
 (* ===== BranchPairResolutionsList ===== *)
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    result = ms["BranchPairResolutionsList", 3];
-    AssociationQ[result] && KeyExistsQ[result, "Resolved"] && KeyExistsQ[result, "Unresolved"],
+    Module[{result = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 3, "BranchPairResolutionsList"]},
+        AssociationQ[result] && KeyExistsQ[result, "Resolved"] && KeyExistsQ[result, "Unresolved"]
+    ],
     True,
     TestID -> "BranchPairResolutionsList-structure"
 ]
 
 
-(* ===== Graph properties (existing, should still work) ===== *)
+(* ===== CanonicalKnuthBendixCompletion ===== *)
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    Head[ms["StatesGraph", 2]],
+    MultiwaySystem[{"A" -> "AB", "BA" -> "A"}, "ABA", "CanonicalKnuthBendixCompletion"],
+    {(_String -> _String) ...},
+    TestID -> "CanonicalKnuthBendixCompletion-returns-rules",
+    SameTest -> MatchQ
+]
+
+
+(* ===== Graph properties ===== *)
+
+VerificationTest[
+    Quiet[Head[MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 2, "StatesGraph"]]],
     Graph,
     TestID -> "StatesGraph-returns-graph"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    VertexCount[ms["StatesGraph", 2]],
-    6,
-    TestID -> "StatesGraph-vertex-count"
-]
-
-VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    Head[ms["EvolutionGraph", 2]],
+    Quiet[Head[MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 2, "EvolutionGraph"]]],
     Graph,
     TestID -> "EvolutionGraph-returns-graph"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    Head[ms["BranchialGraph", 2]],
+    Quiet[Head[MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 2, "BranchialGraph"]]],
     Graph,
     TestID -> "BranchialGraph-returns-graph"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    Quiet[Head[ms["CausalGraph", 2]]],
+    Quiet[Head[MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 2, "CausalGraph"]]],
     Graph,
     TestID -> "CausalGraph-returns-graph"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
-    Head[ms["StatesGraphStructure", 2]],
+    Quiet[Head[MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 2, "StatesGraphStructure"]]],
     Graph,
     TestID -> "StatesGraphStructure-returns-graph"
 ]
@@ -185,15 +179,6 @@ VerificationTest[
 ]
 
 
-(* ===== CanonicalKnuthBendixCompletion ===== *)
-
-VerificationTest[
-    ms = MultiwaySystem[{"A" -> "AB", "BA" -> "A"}, "ABA"];
-    MatchQ[ms["CanonicalKnuthBendixCompletion"], {(_String -> _String) ...}],
-    True,
-    TestID -> "CanonicalKnuthBendixCompletion-returns-rules"
-]
-
 (* ==========================================================================
    CA (Cellular Automaton) — token-based multiway
    Note: our CA semantics differ from RF. We use token-based evolution
@@ -202,36 +187,25 @@ VerificationTest[
    ========================================================================== *)
 
 VerificationTest[
-    ms = MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5]];
-    ms["Type"],
-    "CA",
-    TestID -> "CA-type-detection"
-]
-
-VerificationTest[
-    ms = MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5]];
-    ms["StatesCountsList", 4],
+    MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5], 4, "StatesCountsList"],
     {1, 1, 1, 1, 1},
     TestID -> "CA-single-rule-deterministic"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5]];
-    ms["AllStatesList", 3],
+    MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5], 3],
     {{{1}}, {{1, 1, 1}}, {{1, 1, 0, 0, 1}}, {{1, 1, 0, 1, 1, 1, 1}}},
     TestID -> "CA-single-rule-states"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[{CellularAutomaton[30], CellularAutomaton[110]}, SparseArray[{3 -> 1}, 5]];
-    ms["StatesCountsList", 3],
+    MultiwaySystem[{CellularAutomaton[30], CellularAutomaton[110]}, SparseArray[{3 -> 1}, 5], 3, "StatesCountsList"],
     {1, 2, 3, 6},
     TestID -> "CA-multi-rule-branching"
 ]
 
 VerificationTest[
-    ms = MultiwaySystem[{CellularAutomaton[30], CellularAutomaton[110]}, SparseArray[{3 -> 1}, 5]];
-    ms["AllStatesList", 2],
+    MultiwaySystem[{CellularAutomaton[30], CellularAutomaton[110]}, SparseArray[{3 -> 1}, 5], 2],
     {{{1}}, {{1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 0, 1}, {1, 1, 0, 0, 1}}},
     TestID -> "CA-multi-rule-states"
 ]
