@@ -27,7 +27,7 @@ rfFoliationStates[m_, n_Integer] := Module[{
     fols = multi["FoliationSlices", n];
     statesPerStep = Table[
         Sort @ DeleteDuplicates[
-            FromLinkedHypergraph[#, type] & /@ ReleaseHold[fols[[1, i, 1]]]["Expression"]
+            (If[type === "CA", Normal, Identity] @ FromLinkedHypergraph[#, type]) & /@ ReleaseHold[fols[[1, i, 1]]]["Expression"]
         ],
         {i, Length[fols[[1]]]}
     ];

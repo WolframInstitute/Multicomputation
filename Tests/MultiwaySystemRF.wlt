@@ -194,5 +194,47 @@ VerificationTest[
     TestID -> "CanonicalKnuthBendixCompletion-returns-rules"
 ]
 
+(* ==========================================================================
+   CA (Cellular Automaton) — token-based multiway
+   Note: our CA semantics differ from RF. We use token-based evolution
+   where each cell neighborhood is tracked as a linked hypergraph token.
+   Single-rule CAs are deterministic; multi-rule CAs branch.
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5]];
+    ms["Type"],
+    "CA",
+    TestID -> "CA-type-detection"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5]];
+    ms["StatesCountsList", 4],
+    {1, 1, 1, 1, 1},
+    TestID -> "CA-single-rule-deterministic"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[CellularAutomaton[30], SparseArray[{3 -> 1}, 5]];
+    ms["AllStatesList", 3],
+    {{{1}}, {{1, 1, 1}}, {{1, 1, 0, 0, 1}}, {{1, 1, 0, 1, 1, 1, 1}}},
+    TestID -> "CA-single-rule-states"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{CellularAutomaton[30], CellularAutomaton[110]}, SparseArray[{3 -> 1}, 5]];
+    ms["StatesCountsList", 3],
+    {1, 2, 3, 6},
+    TestID -> "CA-multi-rule-branching"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{CellularAutomaton[30], CellularAutomaton[110]}, SparseArray[{3 -> 1}, 5]];
+    ms["AllStatesList", 2],
+    {{{1}}, {{1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 0, 1}, {1, 1, 0, 0, 1}}},
+    TestID -> "CA-multi-rule-states"
+]
+
 
 EndTestSection[]
