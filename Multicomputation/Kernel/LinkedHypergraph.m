@@ -256,6 +256,14 @@ ToLinkedHypergraph[expr_, patt_] := PatternToLinkedHypergraph[expr, patt]
 ResourceFunction["AddCodeCompletion"]["ToLinkedHypergraph"][None, {"String", "List", "Hypergraph", "ConstructExpression", "Expression", "Graph", "Tree", "CA", "WIHypergraph"}]
 
 
+(* Base case: empty linked hypergraph — handles deletion rules like "AA" -> "" *)
+FromLinkedHypergraph[{}, type : _String | None : "Graph", opts : OptionsPattern[]] := Switch[type,
+	"String", "",
+	"List", {},
+	"Expression" | "ConstructExpression" | "HoldExpression", Null,
+	_, {}
+]
+
 FromLinkedHypergraph[hg : {_List...}, type : _String | None : "Graph", opts : OptionsPattern[]] := FromLinkedHypergraph[Select[hg, Length[#] > 1 &], type, opts]
 
 FromLinkedHypergraph[hg : {{_, _, ___} ...}, type : _String | None : "Graph", opts : OptionsPattern[]] := Switch[
@@ -449,7 +457,7 @@ WolframModelMulti[init_, rules_, opts : OptionsPattern[]] := With[{
 	]
 ]
 
-Options[StringMulti] = {"Cyclic" -> False}
+Options[StringMulti] = Join[{"Cyclic" -> False}, $MultiOptions]
 StringMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 	rules = wrap[rule]
 },
@@ -457,7 +465,7 @@ StringMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 		If[TrueQ[OptionValue["Cyclic"]], ReplacePart[{-1, 3} -> 1], Identity] @ ToLinkedHypergraph[#, "String"] & /@ wrap[init],
 		RuleDelayed @@ Hold[\[FormalCapitalH]_, ApplyStringRules[\[FormalCapitalH], rules]],
 		{1},
-		FilterRules[{opts}, $MultiOptions],
+		opts,
 		"DeepMultiEvaluate" -> False
 	]
 ]

@@ -143,8 +143,8 @@ Generate visualizations of multiway evolution:
 | `"HoldBranches"` | Branches with held expressions |
 | `"BranchPairs"` | Pairs of concurrent branches |
 | `"HoldBranchPairs"` | Branch pairs, held |
-| `"Foliations"` | Layer-by-layer evolution with counts |
-| `"HoldFoliations"` | Foliations with held expressions |
+| `"FoliationSlices"` | Layer-by-layer evolution with counts ([docs](docs/FoliationSlices.md)) |
+| `"HoldFoliationSlices"` | FoliationSlices with held expressions |
 
 ---
 
@@ -189,6 +189,27 @@ subsetSums[nums_] := Total[Multi[{0, #}] & /@ nums]
 
 ss = subsetSums[{3, 7, 1, 8, 4}];
 Pick[ss["Tuples"], ss["EvaluateList"], 12]  (* Subsets summing to 12 *)
+```
+
+---
+
+## MultiwaySystem
+
+`MultiwaySystem` wraps `Multi` for string rewriting with RF-compatible properties. See [docs/MultiwaySystemRF.md](docs/MultiwaySystemRF.md).
+
+```wolfram
+(* Object API *)
+ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA"];
+ms["AllStatesList", 3]
+ms["StatesGraph", 5]
+
+(* Standalone API (RF-compatible, auto-enables DeduplicateSlices) *)
+MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 3, "AllStatesList"]
+MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", 3]  (* defaults to AllStatesList *)
+
+(* With deduplication via object API *)
+ms = MultiwaySystem[{"A" -> "AA", "B" -> "AB"}, "ABA", "DeduplicateSlices" -> True];
+ms["StatesCountsList", 5]
 ```
 
 ---

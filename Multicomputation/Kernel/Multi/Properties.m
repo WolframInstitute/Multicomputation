@@ -406,14 +406,18 @@ MultiProp[multi_, "HoldBranches", args___] := multi["HoldEdges", args][[All, 2]]
 MultiProp[multi_, "BranchPairs", args___] := Catenate[Subsets[#, {2}] & /@ multi["Branches", args]]
 MultiProp[multi_, "HoldBranchPairs", args___] := Catenate[Subsets[#, {2}] & /@ multi["HoldBranches", args]]
 
-MultiProp[multi_, prop : "Foliations" | "HoldFoliations", steps_Integer : 1, lvl_Integer : 2, f_ : Identity] := Module[{counts = <||>},
+MultiProp[multi_, prop : "FoliationSlices" | "HoldFoliationSlices", steps_Integer : 1, lvl_Integer : 2, f_ : Identity] := Module[{
+    counts = <||>,
+    dedupQ = TrueQ["DeduplicateSlices" /. multi["ExtraOptions"]]
+},
     {NestList[
         Function[
             Block[{
-                eventOutputs = Map[f, (Flatten /@ ReleaseHold[#[[1]]][If[prop === "Foliations", "Events", "HoldEvents"], lvl])[[All, All, 2]], {2}],
+                eventOutputs = Map[f, (Flatten /@ ReleaseHold[#[[1]]][If[prop === "FoliationSlices", "Events", "HoldEvents"], lvl])[[All, All, 2]], {2}],
                 eventOutputCounts,
                 newOutputs
             },
+                If[dedupQ, eventOutputs = {DeleteDuplicates[Catenate[eventOutputs]]}];
                 eventOutputCounts = Counts[Catenate @ eventOutputs];
                 newOutputs = Complement[Keys[eventOutputCounts], Keys[counts]];
                 counts = Merge[{counts, eventOutputCounts}, Total];
@@ -421,7 +425,7 @@ MultiProp[multi_, prop : "Foliations" | "HoldFoliations", steps_Integer : 1, lvl
                     If[ Length @ newOutputs > 0,
                         Hold[
                             Evaluate @ If[
-                                prop === "Foliations",
+                                prop === "FoliationSlices",
                                 Multi[#, multi["AllReplaceArguments"]] &,
                                 Function[
                                     Null,

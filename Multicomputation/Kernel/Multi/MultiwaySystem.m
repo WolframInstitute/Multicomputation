@@ -9,25 +9,28 @@ PackageExport["MultiwaySystem"]
 PackageExport["$StateVertexShapeFunction"]
 PackageExport["$EventVertexShapeFunction"]
 
+PackageScope["MultiwaySystemProp"]
+
 
 
 MultiwaySystemQ[MultiwaySystem[_Multi, _String]] := True
 MultiwaySystemQ[___] := False
 
 
-Options[MultiwaySystem] = {Method -> Automatic}
+Options[MultiwaySystem] = Join[{Method -> Automatic}, $MultiOptions]
 
 MultiwaySystem[rules_, opts : OptionsPattern[]] := MultiwaySystem[rules, FirstCase[Unevaluated[rules], (Rule | RuleDelayed)[lhs_, _] :> {lhs}, All], opts]
 
-m : MultiwaySystem[rules_, init_, OptionsPattern[]] /; ! MultiwaySystemQ[Unevaluated[m]] := Enclose @ Block[{
+m : MultiwaySystem[rules_, init_, opts : OptionsPattern[]] /; ! MultiwaySystemQ[Unevaluated[m]] := Enclose @ Block[{
     type = First[MultiwayType /@ wrap[rules]],
     method, methodOpts
 },
     {method, methodOpts} = Replace[OptionValue[Method], {
         Automatic :> {Switch[type, "Hypergraph", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {}},
-        "String" | {"String", opts : OptionsPattern[]} :> {StringMulti, {opts}},
-        {type_, opts : OptionsPattern[]} | type_ :> {Switch[type, "Hypergraph", HypergraphMulti, "WolframModel", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {opts}}
+        "String" | {"String", mopts : OptionsPattern[]} :> {StringMulti, {mopts}},
+        {type_, mopts : OptionsPattern[]} | type_ :> {Switch[type, "Hypergraph", HypergraphMulti, "WolframModel", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {mopts}}
     }];
+    methodOpts = Join[methodOpts, FilterRules[{opts}, Except[Method]]];
     MultiwaySystem[
         Evaluate[method[Unevaluated[init], rules, methodOpts]],
         type
@@ -91,7 +94,7 @@ Block[{g},
                 {},
                 MapThread[{from, to} |-> (DirectedEdge[from, #] & /@ to), {ReleaseHold[#1[[1]]]["Expression"], #2[[2]]}, 1]
              ] & @@@
-                Partition[m["Multi"]["Foliations", n][[1]], 2, 1],
+                Partition[m["Multi"]["FoliationSlices", n][[1]], 2, 1],
             2
         ],
         FilterRules[{opts}, Options[Graph]],
@@ -459,8 +462,8 @@ MultiwaySystemProp[m_, prop : "CausalBranchialGraph" | "EvolutionCausalBranchial
 MultiwaySystemProp[m_, prop : "BranchialGraph" | "AllStatesBranchialGraph", n : _Integer ? Positive : 1, opts : OptionsPattern[]] := With[{type = m["Type"]},
 Block[{edges, g},
     edges = If[ prop === "BranchialGraph",
-        UndirectedEdge @@@ ReleaseHold[m["Multi"]["Foliations", n - 1][[1, -1, 1]]]["BranchPairs"],
-        Block[{foliations = m["Multi"]["Foliations", n - 1][[1, All, 1]]},
+        UndirectedEdge @@@ ReleaseHold[m["Multi"]["FoliationSlices", n - 1][[1, -1, 1]]]["BranchPairs"],
+        Block[{foliations = m["Multi"]["FoliationSlices", n - 1][[1, All, 1]]},
             Sequence @@ {
                 Catenate[ReleaseHold[#]["Expression"] & /@ foliations],
                 Catenate[UndirectedEdge @@@ ReleaseHold[#]["BranchPairs"] & /@ foliations]

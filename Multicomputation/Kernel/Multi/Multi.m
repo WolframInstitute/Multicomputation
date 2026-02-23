@@ -57,7 +57,7 @@ mergeData[data__] := Append[Last[{data}][[{"Expression"}]]] @
 
 
 
-$MultiOptions := $MultiOptions = Join[{"DeepMultiEvaluate" -> True, "ExtraOptions" -> {}}, Options[MultiEvaluate], Options[MultiReplace]]
+$MultiOptions := $MultiOptions = Join[{"DeepMultiEvaluate" -> True, "ExtraOptions" -> {}, "DeduplicateSlices" -> False}, Options[MultiEvaluate], Options[MultiReplace]]
 
 $MultiOptionsPattern := $MultiOptionsPattern = Alternatives @@ ReplacePart[$MultiOptions, {_, 2} -> _]
 

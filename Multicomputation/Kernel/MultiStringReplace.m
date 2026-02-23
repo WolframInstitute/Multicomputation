@@ -56,12 +56,22 @@ ApplyStringRules[hg_ ? LinkedHypergraphQ, rule_] := With[{rules = wrap[rule], le
                 "Output" -> created,
                 "Rule" -> ruleId,
                 "Position" -> List /@ pos
-            |> -> Insert[
-                Delete[hg, List /@ pos],
-                Splice @ Thread[{created, Characters[rhs], Append[Rest[created], If[len > end, hg[[end + 1, 1]], hg[[-1, 3]]]]}],
-                If[start <= end, start, start - end]
+            |> -> If[created === {},
+                Block[{deleted = Delete[hg, List /@ pos], successor = If[len > end, hg[[end + 1, 1]], hg[[-1, 3]]], predPos},
+                    (* Find predecessor edge in deleted result: the one whose "next" points to the start node *)
+                    predPos = FirstPosition[deleted[[All, 3]], hg[[start, 1]]];
+                    If[ListQ[predPos],
+                        ReplacePart[deleted, {predPos[[1]], 3} -> successor],
+                        deleted
+                    ]
+                ],
+                Insert[
+                    Delete[hg, List /@ pos],
+                    Splice @ Thread[{created, Characters[rhs], Append[Rest[created], If[len > end, hg[[end + 1, 1]], hg[[-1, 3]]]]}],
+                    If[start <= end, start, start - end]
+                ]
             ]
         ] &,
-        StringReplaceKeys[StringJoin[hg[[All, 2]]], rules, "Cyclic" -> hg[[-1, 3]] === hg[[1, 1]]]
+        StringReplaceKeys[StringJoin[hg[[All, 2]]], rules, "Cyclic" -> (len > 0 && hg[[-1, 3]] === hg[[1, 1]])]
     ]
 ]
