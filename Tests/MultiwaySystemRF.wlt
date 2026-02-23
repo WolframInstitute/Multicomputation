@@ -210,5 +210,64 @@ VerificationTest[
     TestID -> "CA-multi-rule-states"
 ]
 
+(* ==========================================================================
+   Expression — operator axiom systems (cf. MultiwayOperatorSystem RF)
+   ========================================================================== *)
+
+VerificationTest[
+    MultiwaySystem[f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 3, "StatesCountsList"],
+    {1, 3, 4, 1},
+    TestID -> "Expression-commutative-counts"
+]
+
+VerificationTest[
+    MultiwaySystem[f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 3][[1]],
+    {f[f[a, b], f[c, d]]},
+    TestID -> "Expression-commutative-init"
+]
+
+VerificationTest[
+    MultiwaySystem[f[x_, y_] :> f[y, x], f[a, b], 1],
+    {{f[a, b]}, {f[b, a]}},
+    TestID -> "Expression-simple-swap"
+]
+
+VerificationTest[
+    MultiwaySystem[{f[x_, y_] :> f[y, x], f[f[x_, y_], z_] :> f[x, f[y, z]]}, f[f[a, b], c], 2, "StatesCountsList"],
+    _List,
+    TestID -> "Expression-multi-rule-assoc",
+    SameTest -> MatchQ
+]
+
+
+(* ==========================================================================
+   ConstructExpression — combinator calculi (cf. MultiwayCombinator RF)
+   ========================================================================== *)
+
+VerificationTest[
+    MultiwaySystem[k[x_][y_] :> x, k[a][b], 1],
+    {{k[a][b]}, {a}},
+    TestID -> "Combinator-K-reduction"
+]
+
+VerificationTest[
+    MultiwaySystem[{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 3, "StatesCountsList"],
+    {1, 1, 1, 1},
+    TestID -> "Combinator-SK-deterministic"
+]
+
+VerificationTest[
+    MultiwaySystem[{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 3][[2]],
+    {k[k][s[k]]},
+    TestID -> "Combinator-SK-step1"
+]
+
+VerificationTest[
+    Quiet[MultiwaySystem[{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x, i[x_] :> x}, s[k][i][a], 2]],
+    _List,
+    TestID -> "Combinator-SKI-runs",
+    SameTest -> MatchQ
+]
+
 
 EndTestSection[]

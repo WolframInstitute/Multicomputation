@@ -288,4 +288,32 @@ VerificationTest[
 ]
 
 
+(* ==========================================================================
+   Expression — vs MultiwayOperatorSystem RF
+   Note: RF wraps expression states as strings; we return native expressions.
+   Only StatesCountsList is directly comparable.
+   ========================================================================== *)
+
+VerificationTest[
+    MultiwaySystem[f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 2, "StatesCountsList"],
+    ResourceFunction["MultiwayOperatorSystem"][f[x_, y_] :> f[y, x], f[f[a, b], f[c, d]], 2, "StatesCountsList"],
+    TestID -> "Compare-Expression-commutative-counts"
+]
+
+
+(* ==========================================================================
+   ConstructExpression — vs MultiwayCombinator RF
+   Note: RF wraps combinator states as strings; we return native expressions.
+   Only StatesCountsList is directly comparable.
+   ========================================================================== *)
+
+VerificationTest[
+    MultiwaySystem[{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 2, "StatesCountsList"],
+    ResourceFunction["MultiwayCombinator"][{s[x_][y_][z_] :> x[z][y[z]], k[x_][y_] :> x}, s[k][s][k], 2, "StatesCountsList"],
+    TestID -> "Compare-Combinator-SK-counts"
+]
+
+
 EndTestSection[]
+
+
