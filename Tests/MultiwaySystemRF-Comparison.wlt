@@ -204,7 +204,150 @@ VerificationTest[
     ms = MultiwaySystem[{"A" -> "ABA", "AA" -> "B"}, "ABA"];
     ms["AllEventsList", 3],
     rf[{"A" -> "ABA", "AA" -> "B"}, {"ABA"}, 3, "AllEventsList"],
-    TestID -> "Compare-AllEventsList"
+    TestID -> "Compare-AllEventsList",
+    SameTest -> (Sort[Sort /@ #1] === Sort[Sort /@ #2] &)
+]
+
+
+(* ==========================================================================
+   Sorting system: BA -> AB (causal invariant bubble sort)
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem["BA" -> "AB", "BBBAAA", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 5],
+    rf["BA" -> "AB", "BBBAAA", 5],
+    TestID -> "Compare-Sort-AllStatesList-5"
+]
+
+VerificationTest[
+    ms = MultiwaySystem["BA" -> "AB", "BBBAAA", "DeduplicateSlices" -> True];
+    ms["StatesCountsList", 8],
+    rf["BA" -> "AB", "BBBAAA", 8, "StatesCountsList"],
+    TestID -> "Compare-Sort-StatesCountsList-8"
+]
+
+VerificationTest[
+    ms = MultiwaySystem["BA" -> "AB", "BBBAAA", "DeduplicateSlices" -> True];
+    ms["CausalInvariantQ", 10],
+    rf["BA" -> "AB", "BBBAAA", 10, "CausalInvariantQ"],
+    TestID -> "Compare-Sort-CausalInvariantQ"
+]
+
+
+(* ==========================================================================
+   XOR boolean: TT->F, TF->T, FT->T, FF->F
+   ========================================================================== *)
+
+VerificationTest[
+    xorRules = {"TT" -> "F", "TF" -> "T", "FT" -> "T", "FF" -> "F"};
+    ms = MultiwaySystem[xorRules, "TFTTFF", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 4],
+    rf[{"TT" -> "F", "TF" -> "T", "FT" -> "T", "FF" -> "F"}, "TFTTFF", 4],
+    TestID -> "Compare-XOR-AllStatesList-4"
+]
+
+VerificationTest[
+    xorRules = {"TT" -> "F", "TF" -> "T", "FT" -> "T", "FF" -> "F"};
+    ms = MultiwaySystem[xorRules, "TFTTFF", "DeduplicateSlices" -> True];
+    ms["StatesCountsList", 4],
+    rf[{"TT" -> "F", "TF" -> "T", "FT" -> "T", "FF" -> "F"}, "TFTTFF", 4, "StatesCountsList"],
+    TestID -> "Compare-XOR-StatesCountsList-4"
+]
+
+
+(* ==========================================================================
+   Fibonacci: A->AB, B->A (deterministic, causal invariant)
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem[{"A" -> "AB", "B" -> "A"}, "A", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 6],
+    rf[{"A" -> "AB", "B" -> "A"}, "A", 6],
+    TestID -> "Compare-Fib-AllStatesList-6"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{"A" -> "AB", "B" -> "A"}, "A", "DeduplicateSlices" -> True];
+    ms["StatesCountsList", 6],
+    rf[{"A" -> "AB", "B" -> "A"}, "A", 6, "StatesCountsList"],
+    TestID -> "Compare-Fib-StatesCountsList-6"
+]
+
+
+(* ==========================================================================
+   Growing: AA->BAA, BAA->AB
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem[{"AA" -> "BAA", "BAA" -> "AB"}, "AAA", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 4],
+    rf[{"AA" -> "BAA", "BAA" -> "AB"}, {"AAA"}, 4],
+    TestID -> "Compare-Grow-AllStatesList-4"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{"AA" -> "BAA", "BAA" -> "AB"}, "AAA", "DeduplicateSlices" -> True];
+    Sort[Sort /@ ms["BranchPairsList", 3]],
+    Sort[Sort /@ rf[{"AA" -> "BAA", "BAA" -> "AB"}, {"AAA"}, 3, "BranchPairsList"]],
+    TestID -> "Compare-Grow-BranchPairsList-3"
+]
+
+
+(* ==========================================================================
+   NKS p209: A->ABA, AA->B
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem[{"A" -> "ABA", "AA" -> "B"}, "AABAA", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 3],
+    rf[{"A" -> "ABA", "AA" -> "B"}, "AABAA", 3],
+    TestID -> "Compare-NKS-AllStatesList-3"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{"A" -> "ABA", "AA" -> "B"}, "AABAA", "DeduplicateSlices" -> True];
+    ms["CausalInvariantQ", 3],
+    rf[{"A" -> "ABA", "AA" -> "B"}, "AABAA", 3, "CausalInvariantQ"],
+    TestID -> "Compare-NKS-CausalInvariantQ-3"
+]
+
+
+(* ==========================================================================
+   Single expanding rule: AAB->ABBBAA (causal invariant, single rule)
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem[{"AAB" -> "ABBBAA"}, "AAABBB", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 3],
+    rf[{"AAB" -> "ABBBAA"}, "AAABBB", 3],
+    TestID -> "Compare-Single-AllStatesList-3"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{"AAB" -> "ABBBAA"}, "AAABBB", "DeduplicateSlices" -> True];
+    ms["CausalInvariantQ", 3],
+    rf[{"AAB" -> "ABBBAA"}, "AAABBB", 3, "CausalInvariantQ"],
+    TestID -> "Compare-Single-CausalInvariantQ-3"
+]
+
+
+(* ==========================================================================
+   Converging: A->AB, BA->A
+   ========================================================================== *)
+
+VerificationTest[
+    ms = MultiwaySystem[{"A" -> "AB", "BA" -> "A"}, "ABA", "DeduplicateSlices" -> True];
+    ms["AllStatesList", 4],
+    rf[{"A" -> "AB", "BA" -> "A"}, {"ABA"}, 4],
+    TestID -> "Compare-Conv-AllStatesList-4"
+]
+
+VerificationTest[
+    ms = MultiwaySystem[{"A" -> "AB", "BA" -> "A"}, "ABA", "DeduplicateSlices" -> True];
+    Sort[Sort /@ ms["BranchPairsList", 2]],
+    Sort[Sort /@ rf[{"A" -> "AB", "BA" -> "A"}, {"ABA"}, 2, "BranchPairsList"]],
+    TestID -> "Compare-Conv-BranchPairsList-2"
 ]
 
 
