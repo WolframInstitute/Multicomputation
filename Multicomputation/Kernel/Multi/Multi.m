@@ -11,7 +11,7 @@ PackageScope["MultiDataQ"]
 
 
 
-$MultiKeys := {"Expression", "Values", "Matches", "Rules", "EvaluateOptions", "ReplaceArguments", "ReplaceOptions", "ExtraOptions"}
+$MultiKeys = {"Expression", "Values", "Matches", "Rules", "EvaluateOptions", "ReplaceArguments", "ReplaceOptions", "ExtraOptions"}
 
 Multi[data_Association] /; ContainsOnly[Keys[data], $MultiKeys] && !ContainsExactly[Keys[data], $MultiKeys] :=
     Multi[<|
@@ -59,7 +59,7 @@ mergeData[data__] := Append[Last[{data}][[{"Expression"}]]] @
 
 $MultiOptions := $MultiOptions = Join[{"DeepMultiEvaluate" -> True, "ExtraOptions" -> {}, "DeduplicateSlices" -> False}, Options[MultiEvaluate], Options[MultiReplace]]
 
-$MultiOptionsPattern := $MultiOptionsPattern = Alternatives @@ ReplacePart[$MultiOptions, {_, 2} -> _]
+$MultiOptionsPattern = Alternatives @@ ReplacePart[$MultiOptions, {_, 2} -> _]
 
 Options[Multi] = $MultiOptions
 

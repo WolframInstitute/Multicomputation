@@ -465,7 +465,7 @@ StringMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 		If[TrueQ[OptionValue["Cyclic"]], ReplacePart[{-1, 3} -> 1], Identity] @ ToLinkedHypergraph[#, "String"] & /@ wrap[init],
 		RuleDelayed @@ Hold[\[FormalCapitalH]_, ApplyStringRules[\[FormalCapitalH], rules]],
 		{1},
-		opts,
+		FilterRules[{opts}, $MultiOptions],
 		"DeepMultiEvaluate" -> False
 	]
 ]

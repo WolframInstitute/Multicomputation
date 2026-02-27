@@ -17,6 +17,8 @@ PackageExport["RemoveInitState"]
 PackageExport["RemoveInitEvent"]
 
 PackageScope["lineGraph"]
+PackageScope["treeDataPositions"]
+PackageScope["treeChildrenDataGroups"]
 
 
 
@@ -40,10 +42,18 @@ ToDirectedAcyclicGraph[g_Graph, Shortest[defaultRoot_ : Automatic], opts : Optio
 
 VertexCompleteGraph[vs_List] := With[{n = Length[vs]}, AdjacencyGraph[vs, SparseArray[{i_, i_} -> 0, {n, n}, 1]]]
 
+(* Helpers to replace Tree API that used All -> "..." element specs (broken in WL 15+) *)
+treeDataPositions[tree_Tree, pos_ : {}] := Prepend[{TreeData[tree], pos}] @
+    Catenate @ MapIndexed[treeDataPositions[#1, Append[pos, #2[[1]]]] &, Replace[TreeChildren[tree], None -> {}]]
+
+treeChildrenDataGroups[tree_Tree] := With[{ch = TreeChildren[tree]},
+    If[ch === None, {}, Prepend[TreeData /@ ch] @ Catenate[treeChildrenDataGroups /@ ch]]
+]
+
 Options[BranchialGraph] = Options[Graph]
 
 BranchialGraph[tree_Tree, opts : OptionsPattern[]] := Graph[
-    VertexAdd[GraphUnion @@ Map[VertexCompleteGraph, DeleteCases[None] @ Reap[TreeScan[Sow, tree, All -> "OriginalChildrenData"]][[2, 1]]], {TreeData[tree]}],
+    VertexAdd[GraphUnion @@ Map[VertexCompleteGraph, treeChildrenDataGroups[tree]], {TreeData[tree]}],
     opts,
     ResourceFunction["WolframPhysicsProjectStyleData"]["BranchialGraph"]["Options"]
 ]
@@ -165,7 +175,7 @@ CausalGraph[g_, type : _String | None : None, opts : OptionsPattern[]] := Enclos
     nodes = If[
         VertexCount[lg] == 0,
         {},
-	    SortBy[First] @ TreeLevel[TreeMap[List, ConfirmBy[DirectedGraphTree[lg], TreeQ], All -> {"Data", "Position"}], All -> "Data"]
+	    SortBy[First] @ treeDataPositions[ConfirmBy[DirectedGraphTree[lg], TreeQ]]
     ];
 	positions = Last /@ nodes;
     events = MapAt[First, EdgeList[gg], {{All, 1}, {All, 2}}];
