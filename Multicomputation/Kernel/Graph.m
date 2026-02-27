@@ -366,7 +366,7 @@ CausalStatesGraph[cg_, opts : OptionsPattern[]] := Graph[
 				],
 				ImageSize -> #3
 			],
-			Background -> LightGray], #2],
+			Background -> LightDarkSwitched[LightGray, GrayLevel[0.35]]], #2],
 			#1
 		]
 	],
