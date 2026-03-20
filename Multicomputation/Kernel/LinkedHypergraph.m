@@ -472,7 +472,7 @@ StringMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 
 
 ApplyWIHypergraphRules[lh_ ? LinkedHypergraphQ, rules_, opts : OptionsPattern[]] := Block[{
-	h = Hypergraph[FromLinkedHypergraph[lh, "WIHypergraph"], FilterRules[{opts}, Options[Hypergraph]]], vertexIndex
+	h = Hypergraph[FromLinkedHypergraph[lh, "WIHypergraph"], FilterRules[FilterRules[{opts}, Except[EdgeLabels | "EdgeSymmetry"]], Options[Hypergraph]]], vertexIndex
 },
 	vertexIndex = PositionIndex[VertexList[h]];
 	Association @ Catenate @ MapIndexed[
@@ -506,8 +506,8 @@ WIHypergraphMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 WIHypergraphToLinkedHypergraph[hg_ ? HypergraphQ] := Block[{vertices, edges},
 	vertices = Reap[
 		edges = MapIndexed[
-			Replace[#1, Labeled[vs_, {_, edgeLabel_}] :>
-				{\[FormalE][#2[[1]]], edgeLabel, Splice @ Replace[vs, Labeled[Labeled[v_, _] | v_, l_] :> (Sow[{v, l}]; v), {1}]}] &,
+			Replace[#1, Labeled[vs_, {edgeSymm_, edgeLabel_}] :>
+				{\[FormalE][#2[[1]]], {edgeSymm, edgeLabel}, Splice @ Replace[vs, Labeled[Labeled[v_, _] | v_, l_] :> (Sow[{v, l}]; v), {1}]}] &,
 			ToLabeledEdges[hg]
 		]
 	][[2]];
@@ -516,7 +516,10 @@ WIHypergraphToLinkedHypergraph[hg_ ? HypergraphQ] := Block[{vertices, edges},
 
 LinkedHypergraphWIHypergraph[hg_, OptionsPattern[]] := Block[{vertices, edges},
 	{vertices, edges} = Lookup[GroupBy[hg, MatchQ[#[[1]], \[FormalE][_]] &], {False, True}, {}];
-	Hypergraph[vertices[[All, 1]], edges[[All, 3 ;;]], VertexLabels -> Rule @@@ vertices, EdgeLabels -> Thread[edges[[All, 3 ;;]] -> edges[[All, 2]]]]
+	Hypergraph[vertices[[All, 1]], edges[[All, 3 ;;]], VertexLabels -> Rule @@@ vertices,
+		EdgeLabels -> Thread[edges[[All, 3 ;;]] -> edges[[All, 2, 2]]],
+		"EdgeSymmetry" -> Thread[edges[[All, 3 ;;]] -> edges[[All, 2, 1]]]
+	]
 ]
 
 

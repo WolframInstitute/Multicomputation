@@ -36,14 +36,9 @@ PacletManager`Package`loadWolframLanguageCode[
 SetOptions[MultiEvaluate,
     "EventColumnOptions" -> {
         Alignment -> Center,
-        Background -> {Opacity[0.8, Hue[0.14, 0.34, 1]], RGBColor[0.9998, 0.8347, 0.2631]},
-        BaseStyle -> Directive[Opacity[1], GrayLevel[0], Bold, FontFamily -> "Source Code Pro"]
+        Background -> {Opacity[0.8, LightDarkSwitched[Hue[0.14, 0.34, 1], RGBColor[0.25098, 0.239216, 0.188235]]], LightDarkSwitched[RGBColor[0.9998, 0.8347, 0.2631], RGBColor[0.564706, 0.447059, 0.129412]]},
+        BaseStyle -> Directive[Opacity[1], GrayLevel[0], Bold, FontColor -> Black, FontFamily -> "Source Code Pro"]
     },
     "EventStyleOptions" -> {FontColor -> Directive[Opacity[1], LightDarkSwitched[GrayLevel[0], GrayLevel[1]]], FontFamily -> "Source Code Pro"},
-    "StateStyleOptions" -> {FontWeight -> Bold, FontColor -> Directive[Opacity[1], LightDarkSwitched[GrayLevel[0], GrayLevel[1]]], FontFamily -> "Source Code Pro"},
-    "SideEventFrameOptions" -> {
-        Background -> Directive[Opacity[0.2], Hue[0.14, 0.34, 1]],
-        FrameMargins -> {{2, 2}, {0, 0}},
-        FrameStyle -> Directive[LightDarkSwitched[GrayLevel[0], GrayLevel[0.7]], Dashing[{Small, Small}]]
-    }
+    "StateStyleOptions" -> {FontWeight -> Bold, FontColor -> Directive[Opacity[1], LightDarkSwitched[GrayLevel[0], GrayLevel[1]]], FontFamily -> "Source Code Pro"}
 ];

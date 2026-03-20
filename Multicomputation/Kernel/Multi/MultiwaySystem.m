@@ -51,7 +51,7 @@ MultiwaySystemProp[HoldPattern[MultiwaySystem[_, type_]], "Type"] := type
 
 
 StateShape[hg : {__List}, size_ : Automatic, opts___] := ResourceFunction["WolframModelPlot"][hg, FilterRules[{ImageSize -> size, opts}, Options[HypergraphPlot]], PlotRangePadding -> 0]
-StateShape[hg_ ? HypergraphQ, size_, opts___] := SimpleHypergraphPlot[Hypergraph[hg, FilterRules[{opts}, Options[Hypergraph]]], ImageSize -> size]
+StateShape[hg_ ? HypergraphQ, size_, opts___] := SimpleHypergraphPlot[Hypergraph[hg, FilterRules[FilterRules[{opts}, Except[EdgeLabels | "EdgeSymmetry"]], Options[Hypergraph]]], ImageSize -> size]
 StateShape[_Missing, ___] := ""
 StateShape[expr_, ___] := expr
 
