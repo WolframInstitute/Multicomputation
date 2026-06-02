@@ -470,12 +470,12 @@ StringMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 	]
 ]
 
-
+Options[ApplyWIHypergraphRules] = Join[{"ProcessMatches" -> Identity, "EventSelectionFunction" -> (#2 &)}, Options[WolframInstitute`Hypergraph`HypergraphRules`PackagePrivate`HypergraphRuleApply]]
 ApplyWIHypergraphRules[lh_ ? LinkedHypergraphQ, rules_, opts : OptionsPattern[]] := Block[{
 	h = Hypergraph[FromLinkedHypergraph[lh, "WIHypergraph"], FilterRules[FilterRules[{opts}, Except[EdgeLabels | "EdgeSymmetry"]], Options[Hypergraph]]], vertexIndex
 },
 	vertexIndex = PositionIndex[VertexList[h]];
-	Association @ Catenate @ MapIndexed[
+	OptionValue["EventSelectionFunction"][lh, #] & @ Association @ Catenate @ MapIndexed[
 		{rule, i} |->
 			MapIndexed[With[{input = Join[#DeletedVertices, #MatchVertices]},
 				<|
@@ -485,7 +485,7 @@ ApplyWIHypergraphRules[lh_ ? LinkedHypergraphQ, rules_, opts : OptionsPattern[]]
 					"Position" -> Join[Lookup[vertexIndex, input], #MatchEdgePositions + VertexCount[h]],
 					"Match" -> Iconize[#, "Match"]
 				|> -> ToLinkedHypergraph[#Hypergraph, "WIHypergraph"]
-			 ] &, rule[h, FilterRules[{opts}, Options[WolframInstitute`Hypergraph`HypergraphRules`PackagePrivate`HypergraphRuleApply]]]],
+			 ] &, OptionValue["ProcessMatches"] @ rule[h, FilterRules[{opts}, Options[WolframInstitute`Hypergraph`HypergraphRules`PackagePrivate`HypergraphRuleApply]]]],
 		wrap[rules]
 	]
 ]
@@ -495,7 +495,7 @@ WIHypergraphMulti[init_, rule_, opts : OptionsPattern[]] := With[{
 },
     Multi[
 		ToLinkedHypergraph[#, "WIHypergraph"] & /@ wrap[init],
-		RuleDelayed @@ Hold[\[FormalCapitalH]_, ApplyWIHypergraphRules[\[FormalCapitalH], rules, hopts]],
+		RuleDelayed @@ Hold[\[FormalCapitalH]_, ApplyWIHypergraphRules[\[FormalCapitalH], rules, FilterRules[{hopts}, Options[ApplyWIHypergraphRules]]]],
 		{1},
 		FilterRules[{opts}, $MultiOptions],
 		"DeepMultiEvaluate" -> False,
@@ -517,8 +517,8 @@ WIHypergraphToLinkedHypergraph[hg_ ? HypergraphQ] := Block[{vertices, edges},
 LinkedHypergraphWIHypergraph[hg_, OptionsPattern[]] := Block[{vertices, edges},
 	{vertices, edges} = Lookup[GroupBy[hg, MatchQ[#[[1]], \[FormalE][_]] &], {False, True}, {}];
 	Hypergraph[vertices[[All, 1]], edges[[All, 3 ;;]], VertexLabels -> Rule @@@ vertices,
-		EdgeLabels -> Thread[edges[[All, 3 ;;]] -> edges[[All, 2, 2]]],
-		"EdgeSymmetry" -> Thread[edges[[All, 3 ;;]] -> edges[[All, 2, 1]]]
+		EdgeLabels -> Thread[edges[[All, 3 ;;]] -> Replace[edges[[All, 2]], {_, label_} :> label, 1]],
+		"EdgeSymmetry" -> Thread[edges[[All, 3 ;;]] -> Replace[edges[[All, 2]], {symm_, _} :> symm, 1]]
 	]
 ]
 
