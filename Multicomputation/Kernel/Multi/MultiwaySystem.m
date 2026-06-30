@@ -25,10 +25,11 @@ m : MultiwaySystem[rules_, init_, opts : OptionsPattern[]] /; ! MultiwaySystemQ[
     type = First[MultiwayType /@ wrap[rules]],
     method, methodOpts
 },
-    {method, methodOpts} = Replace[OptionValue[Method], {
-        Automatic :> {Switch[type, "Hypergraph", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {}},
-        "String" | {"String", mopts : OptionsPattern[]} :> {StringMulti, {mopts}},
-        {type_, mopts : OptionsPattern[]} | type_ :> {Switch[type, "Hypergraph", HypergraphMulti, "WolframModel", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {mopts}}
+    {type, method, methodOpts} = Replace[OptionValue[Method], {
+        Automatic :> {type, Switch[type, "Hypergraph", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {}},
+        "String" | {"String", mopts : OptionsPattern[]} :> {"String", StringMulti, {mopts}},
+        "LinkedHypergraph" | {"LinkedHypergraph", mopts : OptionsPattern[]} :> {"LinkedHypergraph", HypergraphMulti, {mopts, "Type" -> None}},
+        {type_, mopts : OptionsPattern[]} | type_ :> {type, Switch[type, "WolframModel", WolframModelMulti, "String", StringMulti, "CA", CAMulti, "WIHypergraph", WIHypergraphMulti, _, HypergraphMulti], {mopts}}
     }];
     methodOpts = Join[methodOpts, FilterRules[{opts}, Except[Method]]];
     MultiwaySystem[

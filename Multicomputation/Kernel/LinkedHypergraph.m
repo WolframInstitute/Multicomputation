@@ -195,7 +195,7 @@ MultiwayType[expr_] := Which[
 	"Expression"
 ]
 
-ToLinkedHypergraph[expr_, autoType : _String | Automatic : Automatic] := With[{type = Replace[autoType, Automatic :> MultiwayType[expr]]},
+ToLinkedHypergraph[expr_, autoType : _String | Automatic | None : Automatic] := With[{type = Replace[autoType, Automatic :> MultiwayType[expr]]},
 	If[	MatchQ[Unevaluated[expr], _Rule | _RuleDelayed],
 		Switch[type,
 			"String",
@@ -216,6 +216,8 @@ ToLinkedHypergraph[expr_, autoType : _String | Automatic : Automatic] := With[{t
 					{All, All, 2}
 				]
 			],
+			"LinkedHypergraph" | None,
+			expr,
 			_,
 			If[	MatchQ[Unevaluated[expr], _[_, _Condition]],
 				Function[Null, Condition[ReplaceAt[Evaluate @ PatternToLinkedHypergraph[expr[[1]], PatternHead[___]], HoldComplete[e_] :> e, {All, 2}], #2] :> {{1, #1}}, HoldAll] @@ ReplacePart[expr, {2, 0} -> Hold][[2]],
@@ -246,6 +248,8 @@ ToLinkedHypergraph[expr_, autoType : _String | Automatic : Automatic] := With[{t
 			ListToLinkedHypergraph[Unevaluated[expr]],
 			"ConstructExpression",
 			ReplaceAt[HoldComplete[e_] :> e, {All, 2}] @ ConstructPatternToLinkedHypergraph[Unevaluated[expr], PatternHead[___]],
+			"LinkedHypergraph" | None,
+			expr,
 			_,
 			ReplaceAt[HoldComplete[e_] :> e, {All, 2}] @ PatternToLinkedHypergraph[Unevaluated[expr], PatternHead[___]]
 		]
@@ -268,7 +272,7 @@ FromLinkedHypergraph[hg : {_List...}, type : _String | None : "Graph", opts : Op
 
 FromLinkedHypergraph[hg : {{_, _, ___} ...}, type : _String | None : "Graph", opts : OptionsPattern[]] := Switch[
 	type,
-	None,
+	"LinkedHypergraph" | None,
 	hg,
 	"Tree",
 	LinkedHypergraphToTree[hg, opts],
