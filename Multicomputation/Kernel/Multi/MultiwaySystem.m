@@ -328,7 +328,7 @@ Options[canonicalizeStates] = Join[{"CanonicalStateFunction" -> None, "ExtraOpti
 canonicalizeStates[g_, type_, opts : OptionsPattern[]] := With[{
     stateCanonicalFunction = Replace[OptionValue["CanonicalStateFunction"], {
         Automatic -> Function[FromLinkedHypergraph[#, type]],
-        "Canonical" | "CanonicalHypergraph" /; type === "WIHypergraph" :> ToLinkedHypergraph @* CanonicalHypergraph @* (FromLinkedHypergraph[ReplacePart[#, {_, 2} -> Automatic], type] &),
+        "Canonical" | "CanonicalHypergraph" /; type === "WIHypergraph" :> ToLinkedHypergraph @* (CanonicalHypergraph[#, "Annotations" -> True] &) @* (FromLinkedHypergraph[#, type] &),
         "Canonical" | "CanonicalHypergraph" -> CanonicalLinkedHypergraph,
         Full -> Function[FromLinkedHypergraph[CanonicalLinkedHypergraph[#], type]]
     }],
